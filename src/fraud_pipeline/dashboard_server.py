@@ -13,6 +13,21 @@ from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 app = FastAPI(title="Fraud Pipeline Dashboard", docs_url=None, redoc_url=None)
+GREETING_MESSAGES = {
+    "hi",
+    "hi there",
+    "hello",
+    "hello there",
+    "hey",
+    "hey there",
+    "good morning",
+    "good afternoon",
+    "good evening",
+}
+GREETING_ANSWER = (
+    "Hello! This is Gianna your fraud expert. How can I assist you today with the "
+    "fraud-pipeline report?"
+)
 
 
 class ChatTurn(BaseModel):
@@ -26,6 +41,10 @@ class ChatRequest(BaseModel):
 
 def get_artifacts_dir() -> Path:
     return Path(os.getenv("FRAUD_PIPELINE_ARTIFACTS", "artifacts")).resolve()
+
+
+def is_greeting(message: str) -> bool:
+    return message.strip().casefold().rstrip("!.,?") in GREETING_MESSAGES
 
 
 @lru_cache(maxsize=1)
@@ -52,6 +71,8 @@ def chat(request: ChatRequest):
         raise HTTPException(status_code=422, detail="End the conversation with a user message.")
     if len(request.messages) > 30 or any(len(turn.content) > 4000 for turn in request.messages):
         raise HTTPException(status_code=413, detail="Conversation is too long.")
+    if len(request.messages) == 1 and is_greeting(request.messages[0].content):
+        return {"answer": GREETING_ANSWER}
 
     from langchain_core.messages import AIMessage, HumanMessage
 

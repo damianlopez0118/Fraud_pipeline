@@ -4,6 +4,7 @@ import pandas as pd
 
 from fraud_pipeline.agent import create_report_tools
 from fraud_pipeline.dashboard_page import render_dashboard
+from fraud_pipeline.dashboard_server import ChatRequest, ChatTurn, chat
 
 
 def test_report_tools_read_pipeline_artifacts(tmp_path):
@@ -41,3 +42,14 @@ def test_dashboard_shell_has_local_assistant_and_plot():
     assert '<div id="plotly-graph"></div>' in html
     assert 'fetch("/api/chat"' in html
     assert "Fraud assistant" in html
+
+
+def test_greeting_gets_dashboard_specific_reply_without_model_call():
+    request = ChatRequest(messages=[ChatTurn(role="user", content="  HI!  ")])
+
+    assert chat(request) == {
+        "answer": (
+            "Hello! This is Gianna your fraud expert. How can I assist you today with the "
+            "fraud-pipeline report?"
+        )
+    }
