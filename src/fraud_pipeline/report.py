@@ -7,6 +7,8 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from sklearn.metrics import precision_recall_curve
 
+from .dashboard_page import render_dashboard
+
 
 def build_dashboard(
     orders: pd.DataFrame,
@@ -51,7 +53,12 @@ def build_dashboard(
     fig.add_hline(y=0.25, line_dash="dash", line_color="red", row=2, col=2)
 
     title = " | ".join(f"{k}={v:.3f}" for k, v in metrics.items())
-    fig.update_layout(title=f"Fraud pipeline dashboard - {title}", height=800, showlegend=False)
+    fig.update_layout(
+        title=f"Fraud pipeline dashboard - {title}", height=800, autosize=True, showlegend=False
+    )
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.write_html(out_path, include_plotlyjs="cdn")
+    plot_html = fig.to_html(
+        full_html=False, include_plotlyjs="cdn", config={"responsive": True}
+    )
+    out_path.write_text(render_dashboard(plot_html), encoding="utf-8")
     return out_path

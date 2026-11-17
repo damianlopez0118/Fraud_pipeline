@@ -20,10 +20,17 @@ dependencies = [
 [project.optional-dependencies]
 spark = ["pyspark"]
 dev = ["pytest", "ruff"]
+agent = [
+    "langgraph>=1.0,<2",
+    "langchain-ollama>=1.0,<2",
+    "fastapi>=0.115,<1",
+    "uvicorn[standard]>=0.34,<1",
+]
 
 [project.scripts]
 fraud-pipeline = "fraud_pipeline.pipeline:main"
 fraud-pipeline-databricks = "fraud_pipeline.pipeline:run_databricks"
+fraud-dashboard = "fraud_pipeline.dashboard_server:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

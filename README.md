@@ -19,11 +19,23 @@ A production-style pipeline for order-fraud detection: **ingest → data-quality
 ## Run it
 
 ```powershell
-pip install -e ".[dev]"
+pip install -e ".[dev,agent]"
 pytest -q
 fraud-pipeline --out artifacts      # writes quality_report.csv, drift_report.csv, dashboard.html, metrics.json
-mlflow ui --backend-store-uri sqlite:///artifacts/mlflow/mlflow.db
 ```
+
+## Local dashboard assistant
+
+The dashboard has a read-only LangGraph assistant for run metrics, data-quality results, and feature drift. It uses Ollama locally; the default model is `qwen2.5:3b`.
+
+```powershell
+ollama pull qwen2.5:3b
+fraud-dashboard --artifacts artifacts
+```
+
+Open `http://127.0.0.1:8000`. If Ollama is not running, start it with `ollama serve` in a separate terminal. Set `OLLAMA_MODEL` or `OLLAMA_BASE_URL` to use another local Ollama model or endpoint. The browser connects only to the local dashboard API; model credentials are not placed in the page.
+
+For a later Databricks migration, the dashboard UI and report-reading tools can remain; the model adapter and artifact location can be switched to Databricks services.
 
 ## Run on Databricks
 
@@ -32,7 +44,6 @@ Requires Databricks CLI 0.292.0 or newer and valid workspace authentication. Cre
 ```powershell
 databricks bundle validate --target dev --var="output_path=/Volumes/your_catalog/your_schema/your_volume/fraud_pipeline"
 databricks bundle deploy --target dev --var="output_path=/Volumes/your_catalog/your_schema/your_volume/fraud_pipeline"
-databricks bundle run --target dev fraud_pipeline
 databricks bundle run --target dev --var="output_path=/Volumes/your_catalog/your_schema/your_volume/fraud_pipeline" fraud_pipeline
 ```
 
@@ -52,4 +63,4 @@ ROC-AUC ≈ 0.95, PR-AUC ≈ 0.58, recall ≈ 0.41 at ≥80% precision (about 3%
 ## Known limits and next steps
 
 - The PySpark aggregation example is separate from the fraud CLI. The Databricks Job bundle uses serverless compute and requires a configured workspace and writable Unity Catalog Volume.
-- Next: Delta Lake output, a model registry stage with promotion gates, a small RAG/agent demo (see [docs/interview_prep.md](docs/interview_prep.md)).
+- Next: Delta Lake output, a model registry stage with promotion gates, and a RAG/agent extension (see [docs/interview_prep.md](docs/interview_prep.md)).
