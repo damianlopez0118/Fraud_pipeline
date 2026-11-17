@@ -1,0 +1,13 @@
+bundle:
+  name: fraud-pipeline
+
+include:
+  - resources/*.yml
+
+variables:
+  output_path:
+    description: Writable Unity Catalog Volume path for pipeline outputs
+
+targets:
+  dev:
+    mode: development

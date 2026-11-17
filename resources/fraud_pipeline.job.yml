@@ -1,0 +1,28 @@
+resources:
+  jobs:
+    fraud_pipeline:
+      name: fraud-pipeline-${bundle.target}
+      performance_target: STANDARD
+      schedule:
+        quartz_cron_expression: "0 0 0 * * ?"
+        timezone_id: UTC
+        pause_status: PAUSED
+      tags:
+        aidevkit_project: ai-dev-kit
+        project: fraud-pipeline
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "6"
+            dependencies:
+              - "-e ${workspace.file_path}"
+      tasks:
+        - task_key: run_pipeline
+          python_wheel_task:
+            package_name: fraud_pipeline
+            entry_point: fraud-pipeline-databricks
+            parameters:
+              - "${var.output_path}"
+          environment_key: default
+          max_retries: 2
+          min_retry_interval_millis: 300000

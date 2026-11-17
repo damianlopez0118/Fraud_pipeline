@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from fraud_pipeline import pipeline
 from fraud_pipeline.data_gen import generate_orders
 from fraud_pipeline.drift import psi
 from fraud_pipeline.features import build_features, time_split
@@ -74,3 +75,17 @@ def test_end_to_end_pipeline(tmp_path):
     assert metrics["roc_auc"] > 0.8
     for name in ("quality_report.csv", "drift_report.csv", "dashboard.html", "metrics.json"):
         assert (tmp_path / name).exists()
+
+def test_databricks_entrypoint_uses_managed_mlflow(monkeypatch, tmp_path):
+    received = {}
+    expected_metrics = {"roc_auc": 0.9}
+
+    def fake_run(out_dir, n=20_000, seed=42, tracking_uri=None):
+        received["out_dir"] = out_dir
+        received["tracking_uri"] = tracking_uri
+        return expected_metrics
+
+    monkeypatch.setattr(pipeline, "run", fake_run)
+
+    assert pipeline.run_databricks(str(tmp_path)) == expected_metrics
+    assert received == {"out_dir": tmp_path, "tracking_uri": "databricks"}

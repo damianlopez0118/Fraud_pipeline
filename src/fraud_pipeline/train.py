@@ -25,7 +25,12 @@ def evaluate(y_true, scores) -> dict[str, float]:
     }
 
 
-def train_model(df: pd.DataFrame, tracking_dir: Path | None = None, seed: int = 42):
+def train_model(
+    df: pd.DataFrame,
+    tracking_dir: Path | None = None,
+    seed: int = 42,
+    tracking_uri: str | None = None,
+):
     """Train on the earlier orders, evaluate out-of-time, and log everything to MLflow."""
     train_df, test_df = time_split(df)
     item_types = sorted(df["item_type"].unique())
@@ -51,7 +56,8 @@ def train_model(df: pd.DataFrame, tracking_dir: Path | None = None, seed: int = 
 
     if tracking_dir is not None:
         tracking_dir.mkdir(parents=True, exist_ok=True)
-        mlflow.set_tracking_uri(f"sqlite:///{(tracking_dir / 'mlflow.db').as_posix()}")
+        default_tracking_uri = f"sqlite:///{(tracking_dir / 'mlflow.db').as_posix()}"
+        mlflow.set_tracking_uri(tracking_uri or default_tracking_uri)
         mlflow.set_experiment("fraud_orders")
         with mlflow.start_run():
             mlflow.log_params(params)

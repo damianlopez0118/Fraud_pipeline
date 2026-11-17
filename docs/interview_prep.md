@@ -31,8 +31,8 @@ Fill the bracketed numbers with your real results. Don't use figures you can't d
 
 ## Gap-closing checklist
 
-- [ ] Run the PySpark job on Databricks Community Edition and write Delta
-- [ ] Run the DAG in Airflow via Docker
+- [ ] Run the PySpark job on Databricks and write Delta
+- [ ] Deploy and test the Databricks Job bundle
 - [ ] Add MLflow model registry and a promotion gate to the pipeline
 - [ ] Build a Tableau or Power BI view of `artifacts/` outputs
 - [ ] Build a small RAG app (embeddings, vector search, retrieval eval) in `portfolio/`

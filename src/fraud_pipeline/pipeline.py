@@ -1,4 +1,4 @@
-"""Pipeline stages and CLI. Each stage is a plain function so an orchestrator (Airflow) can call it."""
+"""Pipeline stages and CLI entry points for local and scheduled runs."""
 
 import argparse
 import json
@@ -28,9 +28,13 @@ def validate(orders_path: Path, out_dir: Path) -> bool:
     return bool(results["passed"].all())
 
 
-def train_and_monitor(orders_path: Path, out_dir: Path) -> dict:
+def train_and_monitor(
+    orders_path: Path, out_dir: Path, tracking_uri: str | None = None
+) -> dict:
     orders = pd.read_parquet(orders_path)
-    _, metrics, x_train, _, scores = train_model(orders, tracking_dir=out_dir / "mlflow")
+    _, metrics, x_train, _, scores = train_model(
+        orders, tracking_dir=out_dir / "mlflow", tracking_uri=tracking_uri
+    )
     _, test_df = time_split(orders)
 
     # Simulate a later production batch with shifted amounts to exercise drift monitoring
@@ -47,11 +51,20 @@ def train_and_monitor(orders_path: Path, out_dir: Path) -> dict:
     return metrics
 
 
-def run(out_dir: Path, n: int = 20_000, seed: int = 42) -> dict:
+def run(
+    out_dir: Path,
+    n: int = 20_000,
+    seed: int = 42,
+    tracking_uri: str | None = None,
+) -> dict:
     orders_path = ingest(out_dir, n, seed)
     if not validate(orders_path, out_dir):
         raise RuntimeError("Data quality checks failed; see quality_report.csv")
-    return train_and_monitor(orders_path, out_dir)
+    return train_and_monitor(orders_path, out_dir, tracking_uri=tracking_uri)
+
+
+def run_databricks(output_path: str) -> dict:
+    return run(Path(output_path), tracking_uri="databricks")
 
 
 def main() -> None:
