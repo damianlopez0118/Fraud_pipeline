@@ -20,6 +20,7 @@ dependencies = [
 [project.optional-dependencies]
 spark = ["pyspark"]
 dev = ["pytest", "ruff"]
+monitoring = ["databricks-sdk>=0.40,<1"]
 agent = [
     "langgraph>=1.0,<2",
     "langchain-ollama>=1.0,<2",
@@ -31,6 +32,7 @@ agent = [
 fraud-pipeline = "fraud_pipeline.pipeline:main"
 fraud-pipeline-databricks = "fraud_pipeline.pipeline:run_databricks"
 fraud-dashboard = "fraud_pipeline.dashboard_server:main"
+socure-monitor = "fraud_pipeline.socure_refresh:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

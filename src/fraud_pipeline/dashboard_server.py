@@ -74,6 +74,12 @@ def chat(request: ChatRequest):
     if len(request.messages) == 1 and is_greeting(request.messages[0].content):
         return {"answer": GREETING_ANSWER}
 
+    from .agent import socure_update_answer
+
+    update_answer = socure_update_answer(request.messages[-1].content, get_artifacts_dir())
+    if update_answer is not None:
+        return {"answer": update_answer}
+
     from langchain_core.messages import AIMessage, HumanMessage
 
     messages = [
@@ -102,6 +108,14 @@ def chat(request: ChatRequest):
     else:
         answer = str(content)
     return {"answer": answer}
+
+
+@app.get("/socure", response_class=FileResponse)
+def socure_dashboard():
+    path = get_artifacts_dir() / "socure.html"
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="Socure snapshot unavailable. Run socure_refresh.")
+    return FileResponse(path, media_type="text/html")
 
 
 def main() -> None:

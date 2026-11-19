@@ -112,7 +112,10 @@ def render_dashboard(plot_html: str) -> str:
 </head>
 <body>
   <div class="dashboard-layout">
-    <main class="visualization">{{plot}}</main>
+    <main class="visualization">
+      <nav aria-label="Dashboards" style="display:flex;gap:20px;margin:0 0 14px;font-size:13px">
+        <a href="/">Pipeline</a><a href="/socure">Socure monitoring</a>
+      </nav>{{plot}}</main>
     <aside class="assistant-panel" aria-label="Fraud pipeline assistant">
       <header class="assistant-header">
         <div class="header-row">
@@ -125,6 +128,7 @@ def render_dashboard(plot_html: str) -> str:
         <button class="suggestion" data-prompt="Summarize this pipeline run.">Run summary</button>
         <button class="suggestion" data-prompt="Which features show the most drift, and what does it mean?">Explain drift</button>
         <button class="suggestion" data-prompt="Did any data quality checks fail?">Check data quality</button>
+        <button class="suggestion" data-prompt="Review the Socure score monitoring snapshot, data quality blockers and performance alerts.">Socure scores</button>
       </nav>
       <form id="chat-form" class="chat-form">
         <textarea id="chat-input" class="chat-input" rows="2" maxlength="4000" placeholder="Ask about this run…" aria-label="Message"></textarea>
